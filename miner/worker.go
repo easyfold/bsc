@@ -665,7 +665,7 @@ func (w *worker) resultLoop() {
 			// Commit block and state to database.
 			task.state.SetExpectedStateRoot(block.Root())
 			start := time.Now()
-			status, err := w.chain.WriteBlockAndSetHead(block, receipts, logs, task.state, true)
+			status, err := w.chain.WriteBlockAndSetHead(block, receipts, logs, task.state, true, w.mux)
 			if status != core.CanonStatTy {
 				if err != nil {
 					log.Error("Failed writing block to chain", "err", err, "status", status)
@@ -1032,6 +1032,8 @@ func (w *worker) prepareWork(genParams *generateParams) (*environment, error) {
 		}
 		if w.chainConfig.Parlia == nil {
 			header.ParentBeaconRoot = genParams.beaconRoot
+		} else if w.chainConfig.IsBohr(header.Number, header.Time) {
+			header.ParentBeaconRoot = new(common.Hash)
 		}
 	}
 	// Could potentially happen if starting to mine in an odd state.

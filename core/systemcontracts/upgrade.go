@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/core/systemcontracts/bohr"
 	"github.com/ethereum/go-ethereum/core/systemcontracts/bruno"
 	"github.com/ethereum/go-ethereum/core/systemcontracts/euler"
 	"github.com/ethereum/go-ethereum/core/systemcontracts/feynman"
@@ -79,6 +80,8 @@ var (
 	feynmanFixUpgrade = make(map[string]*Upgrade)
 
 	haberFixUpgrade = make(map[string]*Upgrade)
+
+	bohrUpgrade = make(map[string]*Upgrade)
 )
 
 func init() {
@@ -737,6 +740,54 @@ func init() {
 			},
 		},
 	}
+
+	bohrUpgrade[mainNet] = &Upgrade{
+		UpgradeName: "bohr",
+		Configs: []*UpgradeConfig{
+			{
+				ContractAddr: common.HexToAddress(ValidatorContract),
+				CommitUrl:    "https://github.com/bnb-chain/bsc-genesis-contract/commit/04bc57c1876dd543dd3133b2755ba87cc5f1796a",
+				Code:         bohr.MainnetValidatorContract,
+			},
+			{
+				ContractAddr: common.HexToAddress(StakeHubContract),
+				CommitUrl:    "https://github.com/bnb-chain/bsc-genesis-contract/commit/04bc57c1876dd543dd3133b2755ba87cc5f1796a",
+				Code:         bohr.MainnetStakeHubContract,
+			},
+		},
+	}
+
+	bohrUpgrade[chapelNet] = &Upgrade{
+		UpgradeName: "bohr",
+		Configs: []*UpgradeConfig{
+			{
+				ContractAddr: common.HexToAddress(ValidatorContract),
+				CommitUrl:    "https://github.com/bnb-chain/bsc-genesis-contract/commit/04bc57c1876dd543dd3133b2755ba87cc5f1796a",
+				Code:         bohr.ChapelValidatorContract,
+			},
+			{
+				ContractAddr: common.HexToAddress(StakeHubContract),
+				CommitUrl:    "https://github.com/bnb-chain/bsc-genesis-contract/commit/04bc57c1876dd543dd3133b2755ba87cc5f1796a",
+				Code:         bohr.ChapelStakeHubContract,
+			},
+		},
+	}
+
+	bohrUpgrade[rialtoNet] = &Upgrade{
+		UpgradeName: "bohr",
+		Configs: []*UpgradeConfig{
+			{
+				ContractAddr: common.HexToAddress(ValidatorContract),
+				CommitUrl:    "https://github.com/bnb-chain/bsc-genesis-contract/commit/04bc57c1876dd543dd3133b2755ba87cc5f1796a",
+				Code:         bohr.RialtoValidatorContract,
+			},
+			{
+				ContractAddr: common.HexToAddress(StakeHubContract),
+				CommitUrl:    "https://github.com/bnb-chain/bsc-genesis-contract/commit/04bc57c1876dd543dd3133b2755ba87cc5f1796a",
+				Code:         bohr.RialtoStakeHubContract,
+			},
+		},
+	}
 }
 
 func UpgradeBuildInSystemContract(config *params.ChainConfig, blockNumber *big.Int, lastBlockTime uint64, blockTime uint64, statedb vm.StateDB) {
@@ -816,6 +867,10 @@ func UpgradeBuildInSystemContract(config *params.ChainConfig, blockNumber *big.I
 
 	if config.IsOnHaberFix(blockNumber, lastBlockTime, blockTime) {
 		applySystemContractUpgrade(haberFixUpgrade[network], blockNumber, statedb, logger)
+	}
+
+	if config.IsOnBohr(blockNumber, lastBlockTime, blockTime) {
+		applySystemContractUpgrade(bohrUpgrade[network], blockNumber, statedb, logger)
 	}
 
 	/*
